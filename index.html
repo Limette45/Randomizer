@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Word Randomizer</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <h1>Word Randomizer</h1>
+
+    <textarea
+        id="input"
+        placeholder="Paste your words and meanings here..."
+    ></textarea>
+
+    <button onclick="randomize()">Randomize</button>
+    <div class="mode-buttons">
+    <button onclick="setMode('original')">Vocab → English</button>
+    <button onclick="setMode('reverse')">Vocab → Spanish</button>
+    </div>
+
+    <div id="result"></div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
