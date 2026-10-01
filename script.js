@@ -1,53 +1,75 @@
-let mode = localStorage.getItem("wordRandomizer_mode") || "original";
+let mode = "original";
 
 
-// Load saved input when the page opens
-window.addEventListener("DOMContentLoaded", () => {
+// Load saved data when the page opens
+document.addEventListener("DOMContentLoaded", function () {
 
-    const savedText = localStorage.getItem("wordRandomizer_input");
+    const input = document.getElementById("input");
+    const result = document.getElementById("result");
 
-    if (savedText !== null) {
-        document.getElementById("input").value = savedText;
+    // Load saved mode
+    const savedMode = localStorage.getItem("wordRandomizer_mode");
+
+    if (savedMode !== null) {
+        mode = savedMode;
     }
 
+    // Load saved input
+    const savedInput = localStorage.getItem("wordRandomizer_input");
+
+    if (savedInput !== null) {
+        input.value = savedInput;
+    }
+
+    // Load saved result
     const savedResult = localStorage.getItem("wordRandomizer_result");
 
     if (savedResult !== null) {
-        document.getElementById("result").innerHTML = savedResult;
+        result.innerHTML = savedResult;
     }
 
+    // Save input whenever it changes
+    input.addEventListener("input", function () {
+        localStorage.setItem(
+            "wordRandomizer_input",
+            input.value
+        );
+    });
+
 });
 
-
-// Save textarea whenever it is changed
-document.getElementById("input").addEventListener("input", () => {
-    localStorage.setItem(
-        "wordRandomizer_input",
-        document.getElementById("input").value
-    );
-});
 
 
 function setMode(newMode) {
 
     mode = newMode;
 
-    localStorage.setItem("wordRandomizer_mode", mode);
+    localStorage.setItem(
+        "wordRandomizer_mode",
+        mode
+    );
 
-    // If there is already a result, randomize it again
     randomize();
 }
 
 
+
 function randomize() {
 
-    const text = document.getElementById("input").value;
+    const input = document.getElementById("input");
 
-    // Save input
-    localStorage.setItem("wordRandomizer_input", text);
+    const text = input.value;
+
+    // Save input immediately
+    localStorage.setItem(
+        "wordRandomizer_input",
+        text
+    );
+
 
     // Split the input into lines
     const lines = text.split("\n");
+
 
     // Get the word and meaning from each line
     const words = lines
@@ -70,6 +92,7 @@ function randomize() {
         const j = Math.floor(Math.random() * (i + 1));
 
         [words[i], words[j]] = [words[j], words[i]];
+
     }
 
 
@@ -113,6 +136,10 @@ function randomize() {
 
     document.getElementById("result").innerHTML = result;
 
-    // Save displayed result
-    localStorage.setItem("wordRandomizer_result", result);
+
+    // Save result
+    localStorage.setItem(
+        "wordRandomizer_result",
+        result
+    );
 }
