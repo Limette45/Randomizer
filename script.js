@@ -1,8 +1,38 @@
-let mode = "original";
+let mode = localStorage.getItem("wordRandomizer_mode") || "original";
+
+
+// Load saved input when the page opens
+window.addEventListener("DOMContentLoaded", () => {
+
+    const savedText = localStorage.getItem("wordRandomizer_input");
+
+    if (savedText !== null) {
+        document.getElementById("input").value = savedText;
+    }
+
+    const savedResult = localStorage.getItem("wordRandomizer_result");
+
+    if (savedResult !== null) {
+        document.getElementById("result").innerHTML = savedResult;
+    }
+
+});
+
+
+// Save textarea whenever it is changed
+document.getElementById("input").addEventListener("input", () => {
+    localStorage.setItem(
+        "wordRandomizer_input",
+        document.getElementById("input").value
+    );
+});
 
 
 function setMode(newMode) {
+
     mode = newMode;
+
+    localStorage.setItem("wordRandomizer_mode", mode);
 
     // If there is already a result, randomize it again
     randomize();
@@ -12,6 +42,9 @@ function setMode(newMode) {
 function randomize() {
 
     const text = document.getElementById("input").value;
+
+    // Save input
+    localStorage.setItem("wordRandomizer_input", text);
 
     // Split the input into lines
     const lines = text.split("\n");
@@ -41,40 +74,45 @@ function randomize() {
 
 
     // Display the words
-    document.getElementById("result").innerHTML =
-        words.map(item => {
+    const result = words.map(item => {
 
-            if (mode === "original") {
+        if (mode === "original") {
 
-                return `
-                    <div class="word"
-                         onclick="this.classList.toggle('show')">
+            return `
+                <div class="word"
+                     onclick="this.classList.toggle('show')">
 
-                        <span>${item.word}</span>
+                    <span>${item.word}</span>
 
-                        <span class="answer">
-                            ${item.meaning}
-                        </span>
+                    <span class="answer">
+                        ${item.meaning}
+                    </span>
 
-                    </div>
-                `;
+                </div>
+            `;
 
-            } else {
+        } else {
 
-                return `
-                    <div class="word"
-                         onclick="this.classList.toggle('show')">
+            return `
+                <div class="word"
+                     onclick="this.classList.toggle('show')">
 
-                        <span>${item.meaning}</span>
+                    <span>${item.meaning}</span>
 
-                        <span class="answer">
-                            ${item.word}
-                        </span>
+                    <span class="answer">
+                        ${item.word}
+                    </span>
 
-                    </div>
-                `;
+                </div>
+            `;
 
-            }
+        }
 
-        }).join("");
+    }).join("");
+
+
+    document.getElementById("result").innerHTML = result;
+
+    // Save displayed result
+    localStorage.setItem("wordRandomizer_result", result);
 }
