@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +7,55 @@
 
     <title>Word Randomizer</title>
 
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 180px;
+            box-sizing: border-box;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        .mode-buttons {
+            margin: 10px 0;
+        }
+
+        #result {
+            margin-top: 20px;
+        }
+
+        .word {
+            padding: 12px;
+            margin-bottom: 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .answer {
+            display: none;
+            margin-top: 8px;
+            color: #1769aa;
+        }
+
+        .word.show .answer {
+            display: block;
+        }
+    </style>
 </head>
 
 <body>
@@ -19,14 +68,135 @@
     ></textarea>
 
     <button onclick="randomize()">Randomize</button>
+
     <div class="mode-buttons">
-    <button onclick="setMode('original')">Vocab → English</button>
-    <button onclick="setMode('reverse')">Vocab → Spanish</button>
+        <button onclick="setMode('original')">Vocab → English</button>
+        <button onclick="setMode('reverse')">Vocab → Spanish</button>
     </div>
+
+    <button id="toggleAnswers" onclick="toggleAllAnswers()">
+        Show All Answers
+    </button>
 
     <div id="result"></div>
 
-    <script src="script.js"></script>
+    <script>
+        let mode = "original";
+        let allAnswersShown = false;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const input = document.getElementById("input");
+            const result = document.getElementById("result");
+
+            const savedMode = localStorage.getItem("wordRandomizer_mode");
+
+            if (savedMode !== null) {
+                mode = savedMode;
+            }
+
+            const savedInput = localStorage.getItem("wordRandomizer_input");
+
+            if (savedInput !== null) {
+                input.value = savedInput;
+            }
+
+            const savedResult = localStorage.getItem("wordRandomizer_result");
+
+            if (savedResult !== null) {
+                result.innerHTML = savedResult;
+            }
+
+            input.addEventListener("input", function () {
+                localStorage.setItem("wordRandomizer_input", input.value);
+            });
+
+            updateToggleButton();
+        });
+
+        function setMode(newMode) {
+            mode = newMode;
+
+            localStorage.setItem("wordRandomizer_mode", mode);
+
+            randomize();
+        }
+
+        function randomize() {
+            const input = document.getElementById("input");
+            const text = input.value;
+
+            localStorage.setItem("wordRandomizer_input", text);
+
+            const lines = text.split("\n");
+
+            const words = lines
+                .map(line => {
+                    const parts = line.trim().split(/\s{2,}/);
+
+                    return {
+                        word: parts[0],
+                        meaning: parts[1] || ""
+                    };
+                })
+                .filter(item => item.word !== "");
+
+            for (let i = words.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [words[i], words[j]] = [words[j], words[i]];
+            }
+
+            const result = words.map(item => {
+                const question = mode === "original"
+                    ? item.word
+                    : item.meaning;
+
+                const answer = mode === "original"
+                    ? item.meaning
+                    : item.word;
+
+                return `
+                    <div class="word ${allAnswersShown ? "show" : ""}"
+                         onclick="this.classList.toggle('show')">
+                        <span>${escapeHTML(question)}</span>
+                        <span class="answer">${escapeHTML(answer)}</span>
+                    </div>
+                `;
+            }).join("");
+
+            document.getElementById("result").innerHTML = result;
+
+            localStorage.setItem("wordRandomizer_result", result);
+
+            updateToggleButton();
+        }
+
+        function toggleAllAnswers() {
+            allAnswersShown = !allAnswersShown;
+
+            document.querySelectorAll("#result .word").forEach(word => {
+                word.classList.toggle("show", allAnswersShown);
+            });
+
+            updateToggleButton();
+        }
+
+        function updateToggleButton() {
+            document.getElementById("toggleAnswers").textContent =
+                allAnswersShown ? "Hide All Answers" : "Show All Answers";
+        }
+
+        function escapeHTML(text) {
+            return String(text).replace(/[&<>"']/g, function (char) {
+                return {
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#39;"
+                }[char];
+            });
+        }
+    </script>
 
 </body>
 </html>
